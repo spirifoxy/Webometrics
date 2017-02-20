@@ -19,12 +19,6 @@ public class Site {
     public Site(String name, String address) {
         this.name = new SimpleStringProperty(name);
         this.address = new SimpleStringProperty(address);
-
-
-        //test
-        //this.name = new SimpleStringProperty("altstu");
-        //this.address = new SimpleStringProperty("www.altstu.ru");
-        //test
     }
 
     public String toString() {

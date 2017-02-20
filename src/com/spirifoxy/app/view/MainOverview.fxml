@@ -1,57 +1,129 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.*?>
+<?import javafx.scene.effect.*?>
+<?import javafx.geometry.*?>
+<?import java.lang.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<VBox alignment="TOP_CENTER" prefHeight="319.0" prefWidth="320.0" xmlns="http://javafx.com/javafx/8"
-      xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.spirifoxy.app.view.SiteOverviewController">
-    <ToolBar prefHeight="40.0" prefWidth="200.0">
-        <Region prefHeight="30.0" prefWidth="31.0"/>
-        <Button fx:id="btnData" mnemonicParsing="false" prefHeight="25.0" prefWidth="100.0" text="Данные"/>
-        <Region prefHeight="30.0" prefWidth="30.0"/>
-        <Button fx:id="btnSettings" mnemonicParsing="false" prefHeight="25.0" prefWidth="100.0" text="Настройки"/>
-        <Region prefHeight="30.0" prefWidth="31.0"/>
-    </ToolBar>
-    <Region prefHeight="30.0" prefWidth="320.0"/>
-    <ChoiceBox fx:id="siteList" prefHeight="30.0" prefWidth="250.0"/>
-    <Region layoutX="10.0" layoutY="50.0" prefHeight="10.0" prefWidth="320.0"/>
-    <AnchorPane prefHeight="30.0" prefWidth="320.0">
-        <RadioButton fx:id="rbtnYandex" layoutX="37.0" layoutY="6.0" mnemonicParsing="false"
-                     onAction="#chooseOption" text="Yandex">
-            <toggleGroup>
-                <ToggleGroup fx:id="groupSE"/>
-            </toggleGroup>
-        </RadioButton>
-        <RadioButton fx:id="rbtnGoogle" layoutX="199.0" layoutY="6.0" mnemonicParsing="false"
-                     onAction="#chooseOption" selected="true" text="Google" toggleGroup="$groupSE"/>
-    </AnchorPane>
-    <Button mnemonicParsing="false" onAction="#launch" text="Запуск"/>
-    <Region layoutX="10.0" layoutY="110.0" prefHeight="10.0" prefWidth="320.0"/>
-    <Region prefHeight="16.0" prefWidth="320.0"/>
-    <ProgressBar fx:id="pbResults" prefHeight="18.0" prefWidth="250.0" progress="0.0"/>
-    <Region prefHeight="15.0" prefWidth="320.0"/>
-    <Region prefHeight="10.0" prefWidth="320.0"/>
-    <VBox>
-        <AnchorPane prefHeight="6.0" prefWidth="320.0">
-            <Label layoutX="38.0" layoutY="6.0" prefHeight="17.0" prefWidth="100.0" text="Size:"/>
-            <Label fx:id="lSize" layoutX="189.0" layoutY="6.0" prefHeight="17.0" prefWidth="100.0"/>
+
+<AnchorPane prefHeight="320.0" prefWidth="320.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.spirifoxy.app.view.SiteOverviewController">
+    <children>
+        <VBox alignment="TOP_CENTER" prefHeight="320.0" prefWidth="320.0">
+            <children>
+                <ToolBar prefHeight="40.0" prefWidth="200.0">
+                    <items>
+                        <Region prefHeight="30.0" prefWidth="31.0" />
+                        <Button fx:id="btnData" mnemonicParsing="false" prefHeight="25.0" prefWidth="100.0" text="Данные" />
+                        <Region prefHeight="30.0" prefWidth="30.0" />
+                        <Button fx:id="btnSettings" mnemonicParsing="false" prefHeight="25.0" prefWidth="100.0" text="Настройки" />
+                        <Region prefHeight="30.0" prefWidth="31.0" />
+                    </items>
+                </ToolBar>
+                <Region prefHeight="30.0" prefWidth="320.0" />
+                <ChoiceBox fx:id="cbSites" prefHeight="30.0" prefWidth="250.0" />
+                <Region layoutX="10.0" layoutY="50.0" prefHeight="10.0" prefWidth="320.0" />
+                <AnchorPane prefHeight="30.0" prefWidth="320.0">
+                    <children>
+                        <RadioButton fx:id="rbtnYandex" layoutX="37.0" layoutY="6.0" mnemonicParsing="false" onAction="#chooseOption" text="Yandex">
+                            <toggleGroup>
+                                <ToggleGroup fx:id="groupSE" />
+                            </toggleGroup>
+                        </RadioButton>
+                        <RadioButton fx:id="rbtnGoogle" layoutX="199.0" layoutY="6.0" mnemonicParsing="false" onAction="#chooseOption" selected="true" text="Google" toggleGroup="$groupSE" />
+                    </children>
+                </AnchorPane>
+                <Button mnemonicParsing="false" onAction="#launch" text="Запуск" />
+                <Region layoutX="10.0" layoutY="110.0" prefHeight="10.0" prefWidth="320.0" />
+                <Region prefHeight="16.0" prefWidth="320.0" />
+                <ProgressBar fx:id="pbResults" prefHeight="18.0" prefWidth="250.0" progress="0.0" />
+                <Region prefHeight="15.0" prefWidth="320.0" />
+                <Region prefHeight="10.0" prefWidth="320.0" />
+                <GridPane>
+                    <columnConstraints>
+                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                    </columnConstraints>
+                    <rowConstraints>
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="5.0" prefHeight="5.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                    </rowConstraints>
+                    <children>
+                        <Label prefHeight="17.0" prefWidth="100.0" text="Size:">
+                            <GridPane.margin>
+                                <Insets left="35.0" />
+                            </GridPane.margin>
+                        </Label>
+                        <Label fx:id="lSize" prefHeight="17.0" prefWidth="100.0" GridPane.columnIndex="1">
+                            <GridPane.margin>
+                                <Insets left="35.0" />
+                            </GridPane.margin>
+                        </Label>
+                        <Label prefHeight="17.0" prefWidth="100.0" text="Visibility:" GridPane.rowIndex="1">
+                            <GridPane.margin>
+                                <Insets left="35.0" />
+                            </GridPane.margin>
+                        </Label>
+
+                        <Label fx:id="lVisibility" prefHeight="17.0" prefWidth="100.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                            <GridPane.margin>
+                                <Insets left="35.0" />
+                            </GridPane.margin>
+                        </Label>
+                        <Label prefHeight="17.0" prefWidth="100.0" text="Rich files:" GridPane.rowIndex="2">
+                            <GridPane.margin>
+                                <Insets left="35.0" />
+                            </GridPane.margin>
+                        </Label>
+                        <Label fx:id="lRichFiles" prefHeight="17.0" prefWidth="100.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                            <GridPane.margin>
+                                <Insets left="35.0" />
+                            </GridPane.margin>
+                        </Label>
+                        <Label prefHeight="17.0" prefWidth="100.0" text="Scholar:" GridPane.rowIndex="3">
+                            <GridPane.margin>
+                                <Insets left="35.0" />
+                            </GridPane.margin>
+                        </Label>
+                        <Label fx:id="lScholar" prefHeight="17.0" prefWidth="100.0" GridPane.columnIndex="1" GridPane.rowIndex="3">
+                            <GridPane.margin>
+                                <Insets left="35.0" />
+                            </GridPane.margin>
+                        </Label>
+                        <Label prefHeight="17.0" prefWidth="120.0" text="Webometrics Rank:" GridPane.rowIndex="5">
+                            <GridPane.margin>
+                                <Insets left="35.0" />
+                            </GridPane.margin>
+                        </Label>
+                        <Label fx:id="lWRank" prefHeight="17.0" prefWidth="100.0" GridPane.columnIndex="1" GridPane.rowIndex="5">
+                            <GridPane.margin>
+                                <Insets left="35.0" />
+                            </GridPane.margin>
+                        </Label>
+
+                    </children>
+                </GridPane>
+                <Region prefHeight="15.0" prefWidth="320.0" />
+            </children>
+        </VBox>
+
+        <AnchorPane fx:id="navList" layoutY="40.0" prefHeight="280.0" prefWidth="320.0" style="-fx-background-color:white" translateX="-320.0" AnchorPane.bottomAnchor="0.0" AnchorPane.topAnchor="40.0">
+            <children>
+                <TableView fx:id="tvSites" editable="true" prefHeight="250.0" prefWidth="320.0">
+                    <columns>
+                        <TableColumn fx:id="colName" maxWidth="152.0" minWidth="152.0" prefWidth="-1.0" text="Имя" />
+                        <TableColumn fx:id="colAddress" maxWidth="152.0" minWidth="152.0" prefWidth="-1.0" text="Адрес" />
+                    </columns>
+                </TableView>
+            <TextField fx:id="tfSiteName" layoutX="5.0" layoutY="255.0" prefHeight="25.0" prefWidth="95.0" promptText="Имя сайта" />
+            <TextField fx:id="tfSiteAddress" layoutX="105.0" layoutY="255.0" prefHeight="25.0" prefWidth="150.0" promptText="Адрес" />
+            <Button layoutX="265.0" layoutY="255.0" mnemonicParsing="false" onAction="#addSite" prefHeight="25.0" prefWidth="25.0" text="+" />
+            <Button fx:id="btnDeleteSite" layoutX="295.0" layoutY="255.0" mnemonicParsing="false" onAction="#deleteSite" prefHeight="25.0" prefWidth="25.0" text="-" />
+            </children>
         </AnchorPane>
-        <AnchorPane layoutX="10.0" layoutY="10.0">
-            <Label layoutX="38.0" layoutY="6.0" prefHeight="17.0" prefWidth="100.0" text="Visibility:"/>
-            <Label fx:id="lVisibility" layoutX="189.0" layoutY="6.0" prefHeight="17.0" prefWidth="100.0"/>
-        </AnchorPane>
-        <AnchorPane layoutX="10.0" layoutY="33.0">
-            <Label layoutX="38.0" layoutY="6.0" prefHeight="17.0" prefWidth="100.0" text="Rich files:"/>
-            <Label fx:id="lRichFiles" layoutX="189.0" layoutY="6.0" prefHeight="17.0" prefWidth="100.0"/>
-        </AnchorPane>
-        <AnchorPane layoutX="10.0" layoutY="56.0">
-            <Label layoutX="38.0" layoutY="6.0" prefHeight="17.0" prefWidth="100.0" text="Scholar:"/>
-            <Label fx:id="lScholar" layoutX="189.0" layoutY="6.0" prefHeight="17.0" prefWidth="100.0"/>
-        </AnchorPane>
-        <Region prefHeight="15.0" prefWidth="320.0"/>
-        <AnchorPane layoutX="10.0" layoutY="79.0">
-            <Label layoutX="38.0" layoutY="6.0" prefHeight="17.0" prefWidth="120.0" text="Webometrics Rank:"/>
-            <Label fx:id="lWRank" layoutX="189.0" layoutY="6.0" prefHeight="17.0" prefWidth="100.0"/>
-        </AnchorPane>
-    </VBox>
-    <Region prefHeight="15.0" prefWidth="320.0"/>
-</VBox>
+    </children>
+</AnchorPane>

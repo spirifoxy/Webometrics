@@ -2,15 +2,21 @@ package com.spirifoxy.app.view;
 
 import com.spirifoxy.app.Main;
 import com.spirifoxy.app.model.Site;
+import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.layout.AnchorPane;
+import javafx.util.Duration;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -19,7 +25,7 @@ import java.util.Arrays;
  */
 public class SiteOverviewController {
     @FXML
-    private ChoiceBox<Site> siteList;
+    private ChoiceBox<Site> cbSites;
     @FXML
     private Button btnData;
     @FXML
@@ -39,11 +45,31 @@ public class SiteOverviewController {
     @FXML
     private Label lWRank;
 
+
+    @FXML
+    private AnchorPane navList;
+    @FXML
+    private TableView<Site> tvSites;
+    @FXML
+    private TableColumn<Site, String> colName;
+    @FXML
+    private TableColumn<Site, String> colAddress;
+    /*@FXML
+    private Button btnAddSite;
+    @FXML
+    private Button btnDeleteSite;*/
+
+    @FXML
+    private TextField tfSiteName;
+    @FXML
+    private TextField tfSiteAddress;
+
     private Main main;
 
     private ArrayList<Label> resultLabels;
 
     enum Options {YANDEX, GOOGLE}
+
     private Options currentOption;
 
     private String user;
@@ -57,22 +83,72 @@ public class SiteOverviewController {
         key = "03.364476428:da836085f2894e4585e1d1499c23ab86";
     }
 
+    private void prepareSlideMenuAnimation() {
+        TranslateTransition openNav = new TranslateTransition(new Duration(700), navList);
+        openNav.setToX(0);
+
+        TranslateTransition closeNav = new TranslateTransition(new Duration(350), navList);
+        btnData.setOnAction((ActionEvent evt) -> {
+            if (navList.getTranslateX() != 0) {
+                openNav.play();
+            } else {
+                closeNav.setToX(-(navList.getWidth()));
+                closeNav.play();
+
+                try {
+                    Writer writer = new FileWriter("res" + main.getDataName());
+                    tvSites.getItems();
+
+                    for (Site s : tvSites.getItems()) {
+                        writer.write(s.getName() + ":" + s.getAddress() + "\n");
+                    }
+                    writer.close();
+                } catch (IOException e) {
+                    main.showErrorBox(e);
+                }
+            }
+        });
+    }
+
+    @FXML
+    private void addSite() {
+        main.addSite(new Site(
+                tfSiteName.getText(),
+                tfSiteAddress.getText())
+        );
+        tfSiteName.clear();
+        tfSiteAddress.clear();
+    }
+
+    @FXML
+    private void deleteSite() {
+        main.deleteSite(tvSites.getSelectionModel().getSelectedItems());
+    }
+
     @FXML
     private void initialize() {
-        btnData.setDisable(true);
         btnSettings.setDisable(true);
         rbtnYandex.setDisable(true);
 
         resultLabels = new ArrayList<>();
         resultLabels.addAll(Arrays.asList(lSize, lVisibility, lRichFiles, lScholar));
+
+        prepareSlideMenuAnimation();
+
+        tvSites.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+
+        colName.setCellValueFactory(cellData -> cellData.getValue().nameProperty());
+        colAddress.setCellValueFactory(cellData -> cellData.getValue().addressProperty());
     }
 
     public void setMain(Main main) {
         this.main = main;
 
-        siteList.setItems(main.getSiteData());
-        if (siteList != null) {
-            siteList.getSelectionModel().selectFirst();
+        cbSites.setItems(main.getSiteData());
+        tvSites.setItems(main.getSiteData());
+
+        if (cbSites.getItems().size() != 0) {
+            cbSites.getSelectionModel().selectFirst();
         }
     }
 
@@ -107,7 +183,7 @@ public class SiteOverviewController {
 
         final String G_SCHOLAR = "http://scholar.google.ru/scholar?as_vis=1&q=site:";
 
-        String url = siteList.getSelectionModel().getSelectedItem().getAddress();
+        String url = cbSites.getSelectionModel().getSelectedItem().getAddress();
 
         ArrayList<Integer> r = new ArrayList<>();
         ArrayList<String> urls = new ArrayList<>();
@@ -157,12 +233,9 @@ public class SiteOverviewController {
                         r.add(Integer.parseInt(result));
                     } catch (Exception e) {
                         Platform.runLater(() -> {
-                            Alert alert = new Alert(Alert.AlertType.ERROR);
-                            alert.setTitle("Ошибка");
-                            alert.setHeaderText("Во время исполнения программы возникла ошибка");
-                            alert.setContentText(e.getMessage());
-                            alert.showAndWait();
+                            main.showErrorBox(e);
                         });
+
                     } finally {
                         fResult = result;
                     }
@@ -175,12 +248,10 @@ public class SiteOverviewController {
                 }
 
                 final int fWR = WR;
-                Platform.runLater(()-> lWRank.setText(Integer.toString(fWR)));
-
+                Platform.runLater(() -> lWRank.setText(Integer.toString(fWR)));
                 return null;
             }
         };
-
         pbResults.progressProperty().bind(request.progressProperty());
         new Thread(request).start();
     }
