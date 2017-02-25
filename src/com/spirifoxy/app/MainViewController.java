@@ -59,18 +59,38 @@ public class MainViewController {
     @FXML
     private TextField tfSiteAddress;
 
-    private Main main;
     private ArrayList<Label> resultLabels;
 
-    enum Options {YANDEX, GOOGLE}
-    private Options currentOption;
+    private Model model;
 
-    private String user;
-    private String key;
+   /* private String user;
+    private String key;*/
 
-    public MainViewController() {
-        currentOption = Options.GOOGLE;
+    /* public MainViewController() {
+         currentOption = Options.GOOGLE;
+     }*/
+    @FXML
+    private void initialize() {
+        model = new Model();
+
+        btnSettings.setDisable(true);
+        rbtnYandex.setDisable(true);
+
+        resultLabels = new ArrayList<>(Arrays.asList(lSize, lVisibility, lRichFiles, lScholar));
+
+        cbSites.setItems(model.getSiteData());
+        tvSites.setItems(model.getSiteData());
+        if (cbSites.getItems().size() != 0) {
+            cbSites.getSelectionModel().selectFirst();
+        }
+
+        tvSites.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        colName.setCellValueFactory(cellData -> cellData.getValue().nameProperty());
+        colAddress.setCellValueFactory(cellData -> cellData.getValue().addressProperty());
+
+        prepareSlideMenuAnimation();
     }
+
 
     private void prepareSlideMenuAnimation() {
         TranslateTransition openNav = new TranslateTransition(new Duration(700), navList);
@@ -84,28 +104,15 @@ public class MainViewController {
                 closeNav.setToX(-(navList.getWidth()));
                 closeNav.play();
 
-                writeTableToFile();
+                model.serializeSites(tvSites.getItems());
+                //writeTableToFile();
             }
         });
     }
 
-    private void writeTableToFile() {
-        try {
-            Writer writer = new FileWriter(main.getDataPath());
-            tvSites.getItems();
-
-            for (Site s : tvSites.getItems()) {
-                writer.write(s.getName() + ":" + s.getAddress() + "\n");
-            }
-            writer.close();
-        } catch (IOException e) {
-            main.showErrorBox(e);
-        }
-    }
-
     @FXML
     private void addSite() {
-        main.addSite(new Site(
+        model.addSite(new Site(
                 tfSiteName.getText(),
                 tfSiteAddress.getText())
         );
@@ -115,38 +122,11 @@ public class MainViewController {
 
     @FXML
     private void deleteSite() {
-        main.deleteSite(tvSites.getSelectionModel().getSelectedItems());
+        model.deleteSite(tvSites.getSelectionModel().getSelectedItems());
     }
 
     @FXML
-    private void initialize() {
-        btnSettings.setDisable(true);
-        rbtnYandex.setDisable(true);
-
-        resultLabels = new ArrayList<>(Arrays.asList(lSize, lVisibility, lRichFiles, lScholar));
-
-        tvSites.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-        colName.setCellValueFactory(cellData -> cellData.getValue().nameProperty());
-        colAddress.setCellValueFactory(cellData -> cellData.getValue().addressProperty());
-
-        prepareSlideMenuAnimation();
-    }
-
-    public void setMain(Main main) {
-        this.main = main;
-
-        cbSites.setItems(main.getSiteData());
-        tvSites.setItems(main.getSiteData());
-
-        if (cbSites.getItems().size() != 0) {
-            cbSites.getSelectionModel().selectFirst();
-        }
-    }
-
-    @FXML
-    private void chooseOption() {
-        currentOption = rbtnYandex.isSelected() ? Options.YANDEX : Options.GOOGLE;
-    }
+    private void chooseOption() { model.setCurrentOption(rbtnYandex.isSelected()); }
 
     @FXML
     private void launch() {
@@ -183,7 +163,7 @@ public class MainViewController {
         }
         lWRank.setText("");
 
-        switch (currentOption) {
+        switch (model.getCurrentOption()) {
             case GOOGLE:
                 urls.addAll(Arrays.asList(
                         G_PAGES_BEGIN + url + G_PAGES_END,
@@ -214,12 +194,11 @@ public class MainViewController {
                     final String fResult;
 
                     try {
-                        result = process(urls.get(i));
+                        result = model.processURL(urls.get(i));
                         r.add(Integer.parseInt(result));
                     } catch (Exception e) {
-                        Platform.runLater(() -> {
-                            main.showErrorBox(e);
-                        });
+                        Platform.runLater(() ->
+                                model.showErrorBox(e));
 
                     } finally {
                         fResult = result;
@@ -241,42 +220,5 @@ public class MainViewController {
         new Thread(request).start();
     }
 
-    private String process(String url) throws Exception {
-        Document e = Jsoup.connect(url).get();
-        Element content;
 
-        switch (currentOption) {
-            case GOOGLE:
-                if (url.substring(7, 14).equals("scholar"))
-                    content = e.getElementById("gs_ab_md");
-                else
-                    content = e.getElementById("resultStats");
-                break;
-            case YANDEX:
-                content = e.select("div[class=serp-adv__found]").first();
-                break;
-            default:
-                content = null;
-        }
-
-        if (content == null)
-            throw new IOException("Ошибка подключения");
-
-        String text = content.text();
-        String[] searchList = {
-                "Нашлось", "Нашлась", "Нашёлся", "Нашлись",
-                "ответ",
-                "тыс.",
-                "Результатов: примерно ",
-                "Результатов: ",
-                "Найдено",
-                "документов",
-                "ов",
-                "а"
-        };
-        for (int i = 0; i < searchList.length; ++i) {
-            text = text.replace(searchList[i], "");
-        }
-        return text.replaceAll("\\(.+\\)", "").replaceAll("[  ]", "");
-    }
 }

@@ -3,12 +3,14 @@ package com.spirifoxy.app;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
+import java.io.*;
+
 /**
  * Класс-модель для сайта
  *
  * Created by spirifoxy on 14.02.2017.
  */
-public class Site {
+public class Site implements Externalizable {
     private StringProperty name;
     private StringProperty address;
 
@@ -47,5 +49,17 @@ public class Site {
 
     public void setAddress(String address) {
         this.address.set(address);
+    }
+
+    @Override
+    public void writeExternal(ObjectOutput out) throws IOException {
+        out.writeObject(getName());
+        out.writeObject(getAddress());
+    }
+
+    @Override
+    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        setName((String )in.readObject());
+        setAddress((String) in.readObject());
     }
 }
