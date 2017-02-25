@@ -1,7 +1,5 @@
 package com.spirifoxy.app;
 
-import com.spirifoxy.app.model.Site;
-import com.spirifoxy.app.view.SiteOverviewController;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -20,7 +18,7 @@ import java.io.*;
 public class Main extends Application {
 
     private ObservableList<Site> siteData;
-    private String dataName;
+    private String dataPath;
 
     public void showErrorBox(Exception e) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -55,10 +53,14 @@ public class Main extends Application {
 
     public Main() {
         siteData = FXCollections.observableArrayList();
-        dataName = "/data.in";
+
+        File here = new File(".");
+        String dataName = "data.in";
 
         try {
-            InputStream in = getClass().getResourceAsStream(dataName);
+            dataPath = here.getCanonicalPath() + "/" + dataName;
+
+            InputStream in = new FileInputStream(dataPath);
             BufferedReader br = new BufferedReader(new InputStreamReader(in));
             String line;
             while ((line = br.readLine()) != null) {
@@ -79,8 +81,8 @@ public class Main extends Application {
         return siteData;
     }
 
-    public String getDataName() {
-        return dataName;
+    public String getDataPath() {
+        return dataPath;
     }
     
     public void addSite(Site s) {
@@ -94,7 +96,7 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
         FXMLLoader loader = new FXMLLoader();
-        loader.setLocation(getClass().getResource("view/MainOverview.fxml"));
+        loader.setLocation(getClass().getResource("MainView.fxml"));
 
         Parent root = loader.load();
 
@@ -104,7 +106,7 @@ public class Main extends Application {
         primaryStage.setScene(new Scene(root));
         primaryStage.show();
 
-        SiteOverviewController controller = loader.getController();
+        MainViewController controller = loader.getController();
         controller.setMain(this);
     }
 

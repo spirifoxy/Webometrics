@@ -1,7 +1,5 @@
-package com.spirifoxy.app.view;
+package com.spirifoxy.app;
 
-import com.spirifoxy.app.Main;
-import com.spirifoxy.app.model.Site;
 import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
@@ -19,11 +17,12 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Random;
 
 /**
  * Created by spirifoxy on 14.02.2017.
  */
-public class SiteOverviewController {
+public class MainViewController {
     @FXML
     private ChoiceBox<Site> cbSites;
     @FXML
@@ -54,10 +53,6 @@ public class SiteOverviewController {
     private TableColumn<Site, String> colName;
     @FXML
     private TableColumn<Site, String> colAddress;
-    /*@FXML
-    private Button btnAddSite;
-    @FXML
-    private Button btnDeleteSite;*/
 
     @FXML
     private TextField tfSiteName;
@@ -65,29 +60,23 @@ public class SiteOverviewController {
     private TextField tfSiteAddress;
 
     private Main main;
-
     private ArrayList<Label> resultLabels;
 
     enum Options {YANDEX, GOOGLE}
-
     private Options currentOption;
 
     private String user;
     private String key;
 
-    public SiteOverviewController() {
+    public MainViewController() {
         currentOption = Options.GOOGLE;
-
-        //TODO change this please
-        user = "spirifoxy";
-        key = "03.364476428:da836085f2894e4585e1d1499c23ab86";
     }
 
     private void prepareSlideMenuAnimation() {
         TranslateTransition openNav = new TranslateTransition(new Duration(700), navList);
         openNav.setToX(0);
-
         TranslateTransition closeNav = new TranslateTransition(new Duration(350), navList);
+
         btnData.setOnAction((ActionEvent evt) -> {
             if (navList.getTranslateX() != 0) {
                 openNav.play();
@@ -95,19 +84,23 @@ public class SiteOverviewController {
                 closeNav.setToX(-(navList.getWidth()));
                 closeNav.play();
 
-                try {
-                    Writer writer = new FileWriter("res" + main.getDataName());
-                    tvSites.getItems();
-
-                    for (Site s : tvSites.getItems()) {
-                        writer.write(s.getName() + ":" + s.getAddress() + "\n");
-                    }
-                    writer.close();
-                } catch (IOException e) {
-                    main.showErrorBox(e);
-                }
+                writeTableToFile();
             }
         });
+    }
+
+    private void writeTableToFile() {
+        try {
+            Writer writer = new FileWriter(main.getDataPath());
+            tvSites.getItems();
+
+            for (Site s : tvSites.getItems()) {
+                writer.write(s.getName() + ":" + s.getAddress() + "\n");
+            }
+            writer.close();
+        } catch (IOException e) {
+            main.showErrorBox(e);
+        }
     }
 
     @FXML
@@ -130,15 +123,13 @@ public class SiteOverviewController {
         btnSettings.setDisable(true);
         rbtnYandex.setDisable(true);
 
-        resultLabels = new ArrayList<>();
-        resultLabels.addAll(Arrays.asList(lSize, lVisibility, lRichFiles, lScholar));
-
-        prepareSlideMenuAnimation();
+        resultLabels = new ArrayList<>(Arrays.asList(lSize, lVisibility, lRichFiles, lScholar));
 
         tvSites.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-
         colName.setCellValueFactory(cellData -> cellData.getValue().nameProperty());
         colAddress.setCellValueFactory(cellData -> cellData.getValue().addressProperty());
+
+        prepareSlideMenuAnimation();
     }
 
     public void setMain(Main main) {
@@ -160,14 +151,13 @@ public class SiteOverviewController {
     @FXML
     private void launch() {
         final String YA_PAGES = "http://yandex.ru/yandsearch?text=site:";
-        final String YA_PAGES_KEY = "http://xmlsearch.yandex.ru/xmlsearch?site=";
+
+        final String YA_PAGES_END = "&lr=197";
 
         final String YA_LINKS_BEGIN = "http://yandex.ru/yandsearch?text=link=\"";
-        final String YA_LINKS_BEGIN_KEY = "http://xmlsearch.yandex.ru/xmlsearch?text=\"http://";
-        final String YA_LINKS_END = "/*\"&noreask=1";
+        final String YA_LINKS_END = "*//*\"&noreask=1";
 
         final String YA_DOC_BEGIN = "http://yandex.ru/yandsearch?text=site:";
-        final String YA_DOC_BEGIN_KEY = "http://xmlsearch.yandex.ru/xmlsearch?text=site:";
         final String YA_DOC_END = "+%26+%28mime:pdf+%7C+mime:ppt+%7C+mime:doc+%7C+mime:docx+%7C+mime:pptx+" +
                 "%7C+mime:odt+%7C+mime:odp%29";
 
@@ -204,14 +194,9 @@ public class SiteOverviewController {
                 break;
             case YANDEX:
                 urls.addAll(Arrays.asList(
-                        YA_PAGES + url,
+                        YA_PAGES + url + YA_PAGES_END,
                         YA_LINKS_BEGIN + url + YA_LINKS_END,
                         YA_DOC_BEGIN + url + YA_DOC_END
-                        /*
-                        YA_PAGES_KEY + url + "&user=" + user + "&key=" + key,
-                        YA_LINKS_BEGIN_KEY + url + YA_LINKS_END + "&user=" + user + "&key=" + key,
-                        YA_DOC_BEGIN_KEY + url + YA_DOC_END + "&user=" + user + "&key=" + key
-                        */
                 ));
                 break;
             default:
@@ -247,8 +232,8 @@ public class SiteOverviewController {
                     WR += coef[i] * r.get(i);
                 }
 
-                final int fWR = WR;
-                Platform.runLater(() -> lWRank.setText(Integer.toString(fWR)));
+                final long fWR = WR;
+                Platform.runLater(() -> lWRank.setText(Long.toString(fWR)));
                 return null;
             }
         };
@@ -268,7 +253,7 @@ public class SiteOverviewController {
                     content = e.getElementById("resultStats");
                 break;
             case YANDEX:
-                content = e.select("found[priority*=phrase]").first();
+                content = e.select("div[class=serp-adv__found]").first();
                 break;
             default:
                 content = null;

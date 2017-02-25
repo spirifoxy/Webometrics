@@ -1,4 +1,4 @@
-package com.spirifoxy.app.model;
+package com.spirifoxy.app;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
