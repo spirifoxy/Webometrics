@@ -1,5 +1,7 @@
 package com.spirifoxy.app;
 
+import com.spirifoxy.app.State.GoogleState;
+import com.spirifoxy.app.State.YandexState;
 import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
@@ -8,16 +10,9 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.util.Duration;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
 
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Random;
 
 /**
  * Created by spirifoxy on 14.02.2017.
@@ -63,18 +58,12 @@ public class MainViewController {
 
     private Model model;
 
-   /* private String user;
-    private String key;*/
-
-    /* public MainViewController() {
-         currentOption = Options.GOOGLE;
-     }*/
     @FXML
     private void initialize() {
         model = new Model();
 
         btnSettings.setDisable(true);
-        rbtnYandex.setDisable(true);
+        //rbtnYandex.setDisable(true);
 
         resultLabels = new ArrayList<>(Arrays.asList(lSize, lVisibility, lRichFiles, lScholar));
 
@@ -104,8 +93,7 @@ public class MainViewController {
                 closeNav.setToX(-(navList.getWidth()));
                 closeNav.play();
 
-                model.serializeSites(tvSites.getItems());
-                //writeTableToFile();
+                model.getDocStrat().save(tvSites.getItems());
             }
         });
     }
@@ -126,62 +114,24 @@ public class MainViewController {
     }
 
     @FXML
-    private void chooseOption() { model.setCurrentOption(rbtnYandex.isSelected()); }
+    private void chooseState(ActionEvent e) {
+        if (rbtnYandex.isSelected())
+            model.setState(new YandexState());
+        else
+            model.setState(new GoogleState());
+    }
 
     @FXML
     private void launch() {
-        final String YA_PAGES = "http://yandex.ru/yandsearch?text=site:";
-
-        final String YA_PAGES_END = "&lr=197";
-
-        final String YA_LINKS_BEGIN = "http://yandex.ru/yandsearch?text=link=\"";
-        final String YA_LINKS_END = "*//*\"&noreask=1";
-
-        final String YA_DOC_BEGIN = "http://yandex.ru/yandsearch?text=site:";
-        final String YA_DOC_END = "+%26+%28mime:pdf+%7C+mime:ppt+%7C+mime:doc+%7C+mime:docx+%7C+mime:pptx+" +
-                "%7C+mime:odt+%7C+mime:odp%29";
-
-        final String G_PAGES_BEGIN = "http://www.google.ru/search?hl=ru&q=site:";
-        final String G_PAGES_END = "&newwindow=1&filter=0";
-
-        final String G_LINKS_BEGIN = "http://www.google.ru/search?hl=ru&q=link:";
-        final String G_LINKS_END = "&newwindow=1&filter=0";
-
-        final String G_DOC_BEGIN = "http://www.google.ru/search?hl=ru&q=site:";
-        final String G_DOC_END = "+filetype:pdf+OR+filetype:ppt+OR+filetype:doc+OR+filetype:ps+OR+filetype:docx+OR+" +
-                "filetype:pptx+OR+filetype:odp+OR+filetype:odt&newwindow=1&filter=0";
-
-        final String G_SCHOLAR = "http://scholar.google.ru/scholar?as_vis=1&q=site:";
-
-        String url = cbSites.getSelectionModel().getSelectedItem().getAddress();
+        Site site = cbSites.getSelectionModel().getSelectedItem();
 
         ArrayList<Integer> r = new ArrayList<>();
-        ArrayList<String> urls = new ArrayList<>();
+        ArrayList<String> urls = model.getState().prepareURLs(site);
 
         for (Label l : resultLabels) {
             l.setText("");
         }
         lWRank.setText("");
-
-        switch (model.getCurrentOption()) {
-            case GOOGLE:
-                urls.addAll(Arrays.asList(
-                        G_PAGES_BEGIN + url + G_PAGES_END,
-                        G_LINKS_BEGIN + url + G_LINKS_END,
-                        G_DOC_BEGIN + url + G_DOC_END,
-                        G_SCHOLAR + url
-                ));
-                break;
-            case YANDEX:
-                urls.addAll(Arrays.asList(
-                        YA_PAGES + url + YA_PAGES_END,
-                        YA_LINKS_BEGIN + url + YA_LINKS_END,
-                        YA_DOC_BEGIN + url + YA_DOC_END
-                ));
-                break;
-            default:
-                break;
-        }
 
         Task request = new Task<Void>() {
             @Override
@@ -198,7 +148,7 @@ public class MainViewController {
                         r.add(Integer.parseInt(result));
                     } catch (Exception e) {
                         Platform.runLater(() ->
-                                model.showErrorBox(e));
+                                Main.showErrorBox(e));
 
                     } finally {
                         fResult = result;

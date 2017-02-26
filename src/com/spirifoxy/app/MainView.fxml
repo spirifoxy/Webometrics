@@ -25,12 +25,12 @@
                 <Region layoutX="10.0" layoutY="50.0" prefHeight="10.0" prefWidth="320.0" />
                 <AnchorPane prefHeight="30.0" prefWidth="320.0">
                     <children>
-                        <RadioButton fx:id="rbtnYandex" layoutX="37.0" layoutY="6.0" mnemonicParsing="false" onAction="#chooseOption" text="Yandex">
+                        <RadioButton fx:id="rbtnYandex" layoutX="37.0" layoutY="6.0" mnemonicParsing="false" onAction="#chooseState" text="Yandex">
                             <toggleGroup>
                                 <ToggleGroup fx:id="groupSE" />
                             </toggleGroup>
                         </RadioButton>
-                        <RadioButton fx:id="rbtnGoogle" layoutX="199.0" layoutY="6.0" mnemonicParsing="false" onAction="#chooseOption" selected="true" text="Google" toggleGroup="$groupSE" />
+                        <RadioButton fx:id="rbtnGoogle" layoutX="199.0" layoutY="6.0" mnemonicParsing="false" onAction="#chooseState" selected="true" text="Google" toggleGroup="$groupSE" />
                     </children>
                 </AnchorPane>
                 <Button mnemonicParsing="false" onAction="#launch" text="Запуск" />
